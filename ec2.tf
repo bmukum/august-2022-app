@@ -1,10 +1,13 @@
-# Set up a Boto3 EC2 client
-ec2 = boto3.client('ec2')
+#resource "aws_instance" "test" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
 
-# Set the instance ID of the EC2 instance you want to start
-instance_id = 'your_instance_id'
+  tags = {
+    Name = "HelloWorld"
+  }
+}
 
-# Start the EC2 instance
-ec2.start_instances(InstanceIds=[instance_id])
-
-print(f'Starting instance {instance_id}')
+resource "aws_ec2_instance_state" "test" {
+  instance_id = aws_instance.test.id
+  state       = "stopped"
+}
