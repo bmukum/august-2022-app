@@ -1,3 +1,6 @@
+provider "aws" {
+}
+
 resource "aws_vpc" "my_vpc" {
   cidr_block       = var.vpc_cidr
   instance_tenancy = "default"
@@ -16,10 +19,10 @@ resource "aws_subnet" "sub1" {
   }
 }
 
-output "vpc_id" {
-  value = aws_vpc.my_vpc.id
-}
+# output "vpc_id" {
+#   value = aws_vpc.my_vpc.id
+# }
 
-output "subnet_id" {
-  value = aws_subnet.sub1.id
-}
+# output "subnet_id" {
+#   value = aws_subnet.sub1.id
+# }
