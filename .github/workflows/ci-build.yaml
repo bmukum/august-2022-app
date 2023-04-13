@@ -2,13 +2,11 @@ name: build
 on:
   push:
     branches:
-    - master
     - main
     paths:
     - app/**
   pull_request:
     branches:
-    - master
     - main
     paths:
     - app/**
