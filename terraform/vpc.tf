@@ -1,84 +1,54 @@
+resource "aws_vpc" "eks_network" {
+  cidr_block           = var.cidr_block
+  enable_dns_hostnames = true
+  tags = {
+    Name = var.name
+  }
 
+  lifecycle {
+    ignore_changes = [
+      tags,
+    ]
+  }
+}
 
-# # Creat vpc, name, tag and CIDR
+# Internet gateway
+resource "aws_internet_gateway" "eks_network_gateway" {
+  vpc_id = aws_vpc.eks_network.id
 
-# resource "aws_vpc" "demo" {
-#   cidr_block           = "10.0.0.0/16"
-#   instance_tenancy     = "default"
-#   enable_dns_support   = "true"
-#   enable_dns_hostnames = "true"
-#   tags = {
-#     Name = "demo"
-#   }
-# }
+  tags = {
+    Name = var.name
+  }
+}
 
-# # Creating public subnets in VPC 
-# resource "aws_subnet" "demo_public-1" {
-#   vpc_id                  = aws_vpc.demo.id
-#   cidr_block              = "10.0.1.0/24"
-#   map_public_ip_on_launch = "true"
-#   availability_zone       = "us-east-1a"
-#   tags = {
-#     Name = "demo_public-1"
-#   }
-# }
+# NAT gateway
+resource "aws_eip" "eks_network_nat_gateway" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.eks_network_gateway]
 
-# resource "aws_subnet" "demo_public-2" {
-#   vpc_id                  = aws_vpc.demo.id
-#   cidr_block              = "10.0.2.0/24"
-#   map_public_ip_on_launch = "true"
-#   availability_zone       = "us-east-1b"
-#   tags = {
-#     Name = "demo_public-2"
-#   }
-# }
+  tags = {
+    Name = "${var.name}-nat-gateway"
+  }
+}
 
-# # Creating IGW in aws VPC
-# resource "aws_internet_gateway" "myIGW" {
-#   vpc_id = aws_vpc.demo.id
-#   tags = {
-#     Name = "myIGW"
-#   }
-# }
+resource "aws_route_table" "eks_network_public" {
+  vpc_id = aws_vpc.eks_network.id
 
-# # Creating private subnets
-# resource "aws_subnet" "demo_private-1" {
-#   vpc_id            = aws_vpc.demo.id
-#   cidr_block        = "10.0.3.0/24"
-#   availability_zone = "us-east-1a"
-#   tags = {
-#     Name = "AppTier_priv_sub"
-#   }
-# }
+  tags = {
+    Name = "${var.name}-public"
+  }
+}
 
-# resource "aws_subnet" "demo_private-2" {
-#   vpc_id            = aws_vpc.demo.id
-#   cidr_block        = "10.0.4.0/24"
-#   availability_zone = "us-east-1b"
-#   tags = {
-#     Name = "DataTier_priv_sub"
-#   }
-# }
+resource "aws_route" "internet-gateway" {
+  route_table_id         = aws_route_table.eks_network_public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.eks_network_gateway.id
+}
 
-# # Creating route tables for IGW
-# resource "aws_route_table" "pub_RTB" {
-#   vpc_id = aws_vpc.demo.id
-#   route {
-#     cidr_block = "0.0.0.0/0"
-#     gateway_id = aws_internet_gateway.myIGW.id
-#   }
-#   tags = {
-#     Name = "pub_RTB"
-#   }
-# }
+resource "aws_default_route_table" "eks_network_private" {
+  default_route_table_id = aws_vpc.eks_network.default_route_table_id
 
-# # Creating Route Associations
-# resource "aws_route_table_association" "demo_public-1" {
-#   subnet_id      = aws_subnet.demo_public-1.id
-#   route_table_id = aws_route_table.pub_RTB.id
-# }
-# resource "aws_route_table_association" "demo_public-2" {
-#   subnet_id      = aws_subnet.demo_public-2.id
-#   route_table_id = aws_route_table.pub_RTB.id
-# }
-# //
+  tags = {
+    Name = "${var.name}-private"
+  }
+}
