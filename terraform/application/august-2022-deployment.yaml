@@ -20,6 +20,7 @@ spec:
       labels:
         app: august-2022-app
     spec:
+      serviceAccountName: august-2022-app
       containers:
       - image: bmukum/august-2022-app:v15
         imagePullPolicy: Always
@@ -27,3 +28,7 @@ spec:
         ports:
         - containerPort: 3000
           protocol: TCP
+        envFrom:
+          - configMapRef:
+              name: august-2022-app
+        
