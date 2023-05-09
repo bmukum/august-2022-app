@@ -4,7 +4,7 @@ Before starting this exercise, make sure you're connected to the AWS account usi
 - On the AWS management console, under services, search “CodeCommit”.
 - Find and click on “Create Repository”
 - Enter  "web-app" as the repository name, a description, and click on “create”.
-- On your local computer, install git.
+- You have now created the codecommit repository.
 ```
 $ sudo yum install - git
 ```
